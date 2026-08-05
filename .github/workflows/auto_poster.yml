@@ -1,9 +1,9 @@
 name: Auto Generate and Publish Article
 
 on:
-  workflow_dispatch: # Aap jab chahein GitHub par ek click karke naya article generate karwa sakte hain
+  workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *' # Yeh rozana ek naya article khud-ba-khud generate kar dega (optional)
+    - cron: '0 0 * * *'
 
 jobs:
   build:
@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Run AI Generator Script
+      - name: Run AI Generator Script and Update Indexes
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -34,35 +34,44 @@ jobs:
           api_key = os.environ["GEMINI_API_KEY"]
           gh_token = os.environ["GH_TOKEN"]
           repo = "hp00101/auto-blog"
+          headers = {"Authorization": f"Bearer {gh_token}", "Accept": "vnd.github+json"}
 
+          # 1. Generate Content from Gemini API
           url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-          prompt = "Write an SEO-optimized HTML article about a trending tech or cloud hosting tool in 2026. Include headings (<h2>, <h3>), paragraphs (<p>), and a link mentioning Hostinger or Make.com. Return ONLY the HTML body content inside standard HTML article tags, without markdown code blocks."
+          prompt = "Write an SEO-optimized HTML article about a trending tech or cloud hosting tool in 2026. Include a catchy h2 title at the very beginning, followed by headings (<h2>, <h3>), paragraphs (<p>), and a link mentioning Hostinger or Make.com. Return ONLY the HTML body content inside standard HTML article tags, without markdown code blocks."
           
           payload = {"contents": [{"parts": [{"text": prompt}]}]}
           response = requests.post(url, headers={"Content-Type": "application/json"}, data=json.dumps(payload))
           
           if response.status_code == 200:
-              article_html = response.json()["candidates"][0]["content"]["parts"][0]["text"]
-              date_str = datetime.now().strftime("%Y-%m-%d-%H%M%S")
-              filename = f"posts/ai-article-{date_str}.html"
+              res_json = response.json()
+              article_html = res_json["candidates"][0]["content"]["parts"][0]["text"]
               
+              date_str = datetime.now().strftime("%Y-%m-%d-%H%M%S")
+              file_slug = f"ai-article-{date_str}"
+              filename = f"posts/{file_slug}.html"
+              
+              # Extract title or use a generic one
+              title = f"AI Tech Insight - {datetime.now().strftime(\"%b %d, %Y\")}"
+              
+              # 2. Create Full Article HTML Page
               full_page = f"""<!DOCTYPE html>
-              <html lang="en">
+              <html lang=\"en\">
               <head>
-                  <meta charset="UTF-8">
-                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                  <title>AI Tech Insights</title>
-                  <link rel="stylesheet" href="../styles.css">
+                  <meta charset=\"UTF-8\">
+                  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+                  <title>{title}</title>
+                  <link rel=\"stylesheet\" href=\"../styles.css\">
               </head>
               <body>
                   <header>
-                      <div class="container">
+                      <div class=\"container\">
                           <h1>Tech & AI Insights Hub</h1>
-                          <p><a href="../index.html" style="color: #bdc3c7; text-decoration: none;">&larr; Back to Home</a></p>
+                          <p><a href=\"../index.html\" style=\"color: #bdc3c7; text-decoration: none;\">&larr; Back to Home</a></p>
                       </div>
                   </header>
-                  <main class="container">
-                      <article class="post-card">
+                  <main class=\"container\">
+                      <article class=\"post-card\">
                           {article_html}
                       </article>
                   </main>
@@ -72,16 +81,48 @@ jobs:
               </body>
               </html>"""
 
+              # 3. Push New Article File to GitHub
               gh_url = f"https://api.github.com/repos/{repo}/contents/{filename}"
               encoded_content = base64.b64encode(full_page.encode("utf-8")).decode("utf-8")
               data = {
-                  "message": f"Automated AI article: {filename}",
+                  "message": f"Auto-generated article: {filename}",
                   "content": encoded_content,
                   "branch": "main"
               }
-              headers = {"Authorization": f"Bearer {gh_token}", "Accept": "vnd.github+json"}
               put_res = requests.put(gh_url, headers=headers, data=json.dumps(data))
-              print("Publish status:", put_res.status_code)
+              print("Article publish status:", put_res.status_code)
+
+              # 4. Update posts/index.html to automatically include the new post
+              posts_index_url = f"https://api.github.com/repos/{repo}/contents/posts/index.html"
+              get_pi = requests.get(posts_index_url, headers=headers)
+              if get_pi.status_code == 200:
+                  pi_data = get_pi.json()
+                  pi_sha = pi_data["sha"]
+                  pi_content = base64.b64decode(pi_data["content"]).decode("utf-8")
+                  
+                  # Insert new post card right above the first existing article
+                  new_card = f"""
+                  <article class="post-card">
+                      <h3><a href="{file_slug}.html">{title}</a></h3>
+                      <p class="date">Automated Post</p>
+                      <p>Explore the latest automated insights on software and cloud tools.</p>
+                      <a href="{file_slug}.html" class="read-more">Read Article &rarr;</a>
+                  </article>
+                  """
+                  
+                  if "<h2>All Published Articles</h2>" in pi_content:
+                      updated_pi = pi_content.replace("<h2>All Published Articles</h2>", f"<h2>All Published Articles</h2>\n{new_card}")
+                  else:
+                      updated_pi = pi_content + new_card
+                      
+                  encoded_pi = base64.b64encode(updated_pi.encode("utf-8")).decode("utf-8")
+                  pi_put_data = {
+                      "message": f"Update posts/index.html with {file_slug}",
+                      "content": encoded_pi,
+                      "sha": pi_sha,
+                      "branch": "main"
+                  }
+                  requests.put(posts_index_url, headers=headers, data=json.dumps(pi_put_data))
           else:
               print("Gemini API Error:", response.text)
           '
