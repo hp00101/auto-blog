@@ -26,10 +26,1079 @@
             width: 100%;
             height: 100%;
         }
+
+        :root {
+    --accent-glow: #ff007f;
+    --accent-glow-rgb: 255, 0, 127;
+    --accent-secondary: #00f0ff;
+    --accent-secondary-rgb: 0, 240, 255;
+
+    --bg-dark: #05050c;
+    --panel-bg: rgba(10, 10, 25, 0.6);
+    --panel-border: rgba(255, 255, 255, 0.08);
+    --text-primary: #f0f0f5;
+    --text-muted: #8e8e9f;
+}
+
+body[data-theme="toxic"] {
+    --accent-glow: #39ff14;
+    --accent-glow-rgb: 57, 255, 20;
+    --accent-secondary: #00e5ff;
+    --accent-secondary-rgb: 0, 229, 255;
+}
+
+body[data-theme="volcano"] {
+    --accent-glow: #ff3300;
+    --accent-glow-rgb: 255, 51, 0;
+    --accent-secondary: #ffb700;
+    --accent-secondary-rgb: 255, 183, 0;
+}
+
+body[data-theme="abyss"] {
+    --accent-glow: #bd00ff;
+    --accent-glow-rgb: 189, 0, 255;
+    --accent-secondary: #0077ff;
+    --accent-secondary-rgb: 0, 119, 255;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body,
+html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--bg-dark);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--text-primary);
+    touch-action: none;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.glass-panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    border-radius: 16px;
+    z-index: 10;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+
+#controls-panel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 340px;
+    max-height: calc(100% - 40px);
+    padding: 24px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+#controls-panel::-webkit-scrollbar {
+    width: 4px;
+}
+
+#controls-panel::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.panel-header h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-shadow: 0 0 10px rgba(var(--accent-glow-rgb), 0.3);
+}
+
+.panel-header h2 i {
+    color: var(--accent-glow);
+    animation: pulse 2s infinite alternate;
+}
+
+.subtitle {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.controls-group {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.control-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.control-item label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.control-item label i {
+    color: var(--accent-secondary);
+    font-size: 0.9rem;
+}
+
+select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+select:focus {
+    border-color: var(--accent-secondary);
+    box-shadow: 0 0 8px rgba(var(--accent-secondary-rgb), 0.2);
+}
+
+select option {
+    background: #0f0f20;
+    color: var(--text-primary);
+}
+
+.slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.slider-header span {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    background: rgba(var(--accent-glow-rgb), 0.15);
+    color: var(--accent-glow);
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(var(--accent-glow-rgb), 0.3);
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent-secondary);
+    cursor: pointer;
+    box-shadow: 0 0 8px var(--accent-secondary);
+    transition: transform 0.1s, background-color 0.3s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    background: var(--accent-glow);
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.checkbox-item {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.checkbox-item input[type="checkbox"]:checked {
+    background: var(--accent-glow);
+    border-color: var(--accent-glow);
+    box-shadow: 0 0 8px rgba(var(--accent-glow-rgb), 0.4);
+}
+
+.checkbox-item input[type="checkbox"]:checked::before {
+    content: "\f00c";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: white;
+    font-size: 10px;
+}
+
+.checkbox-item label {
+    cursor: pointer;
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.action-btn {
+    flex: 1;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.glow-btn {
+    background: var(--accent-glow);
+    color: white;
+    box-shadow: 0 0 15px rgba(var(--accent-glow-rgb), 0.4);
+}
+
+.glow-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 22px rgba(var(--accent-glow-rgb), 0.7);
+}
+
+.glow-btn:active {
+    transform: translateY(0);
+}
+
+.secondary-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.secondary-btn:active {
+    transform: scale(0.98);
+}
+
+.instructions {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 14px;
+}
+
+.instructions h3 {
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    color: var(--accent-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.instructions ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.instructions li {
+    font-size: 0.75rem;
+    line-height: 1.35;
+    color: var(--text-muted);
+}
+
+.instructions li span {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+#status-bar {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    z-index: 10;
+    display: flex;
+    gap: 12px;
+    font-size: 0.8rem;
+    pointer-events: none;
+}
+
+#fly-counter,
+#instruction-tip {
+    background: rgba(5, 5, 10, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 8px 14px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+#fly-counter i {
+    color: var(--accent-glow);
+}
+
+#instruction-tip {
+    color: var(--text-muted);
+}
+
+.ui-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid var(--panel-border);
+    background: var(--panel-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    color: var(--text-primary);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+    z-index: 11;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s;
+}
+
+.ui-btn:hover {
+    color: var(--accent-glow);
+    border-color: rgba(var(--accent-glow-rgb), 0.3);
+    box-shadow: 0 0 10px rgba(var(--accent-glow-rgb), 0.3);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: none;
+    padding: 4px;
+    transition: color 0.3s;
+}
+
+.close-btn:hover {
+    color: var(--accent-glow);
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        text-shadow: 0 0 5px rgba(var(--accent-glow-rgb), 0.2);
+    }
+
+    100% {
+        transform: scale(1.05);
+        text-shadow: 0 0 15px rgba(var(--accent-glow-rgb), 0.6);
+    }
+}
+
+@media (max-width: 768px) {
+    .ui-btn {
+        display: flex;
+    }
+
+    #controls-panel {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        width: 100%;
+        max-height: 80vh;
+        border-radius: 20px 20px 0 0;
+        border-bottom: none;
+        padding: 24px;
+        transform: translateY(105%);
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    #controls-panel.active {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .close-btn {
+        display: block;
+    }
+
+    #status-bar {
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: max-content;
+        justify-content: center;
+    }
+}
+
+@media (max-height: 600px) and (max-width: 768px) {
+    #controls-panel {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .controls-group {
+        gap: 12px;
+    }
+}
+        
     </style>
 </head>
 <body>
     <canvas id="canvas"></canvas>
     <script src="script.js"></script>
 </body>
+<script>const canvas = document.getElementById("canvas") || document.createElement("canvas");
+if (!document.body.contains(canvas)) {
+    document.body.appendChild(canvas);
+}
+const ctx = canvas.getContext("2d");
+
+let width = window.innerWidth || 800;
+let height = window.innerHeight || 600;
+
+function initCanvas() {
+    width = window.innerWidth || document.documentElement.clientWidth || 800;
+    height = window.innerHeight || document.documentElement.clientHeight || 600;
+    canvas.width = width;
+    canvas.height = height;
+}
+initCanvas();
+
+const mouse = {
+    x: width / 2,
+    y: height / 2
+};
+
+window.addEventListener("mousemove", (e) => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+});
+
+window.addEventListener("touchmove", (e) => {
+    if (e.touches.length > 0) {
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
+    }
+}, { passive: true });
+
+function dist(x1, y1, x2, y2) {
+    return Math.hypot(x2 - x1, y2 - y1);
+}
+
+function angleBetween(x1, y1, x2, y2) {
+    return Math.atan2(y2 - y1, x2 - x1);
+}
+
+let webSpokes = [];
+let webRings = [];
+let dewDrops = [];
+let frame = 0;
+
+function generateWeb() {
+    webSpokes = [];
+    webRings = [];
+    dewDrops = [];
+
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const maxRadius = Math.max(width, height) * 0.85;
+    const numSpokes = 16;
+
+    for (let i = 0; i < numSpokes; i++) {
+        let angle = (i / numSpokes) * Math.PI * 2 + 0.05;
+        webSpokes.push({
+            angle: angle,
+            endX: centerX + Math.cos(angle) * maxRadius,
+            endY: centerY + Math.sin(angle) * maxRadius
+        });
+    }
+
+    const numRings = 9;
+    for (let r = 1; r <= numRings; r++) {
+        let radius = (r / numRings) * (Math.min(width, height) * 0.48);
+        let ringPoints = [];
+
+        for (let i = 0; i < numSpokes; i++) {
+            let angle = webSpokes[i].angle;
+            let sag = Math.sin((i / numSpokes) * Math.PI * 4) * 4;
+            let px = centerX + Math.cos(angle) * (radius + sag);
+            let py = centerY + Math.sin(angle) * (radius + sag);
+
+            ringPoints.push({ x: px, y: py, baseRadius: radius });
+            if (Math.random() < 0.35) {
+                dewDrops.push({
+                    x: px + (Math.random() - 0.5) * 6,
+                    y: py + (Math.random() - 0.5) * 6,
+                    size: Math.random() * 2 + 1,
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+        }
+        webRings.push(ringPoints);
+    }
+}
+generateWeb();
+
+window.addEventListener("resize", () => {
+    initCanvas();
+    generateWeb();
+});
+
+function drawWeb() {
+    const centerX = width / 2;
+    const centerY = height / 2;
+
+    ctx.save();
+
+    let ambientGrad = ctx.createRadialGradient(centerX, centerY, 10, centerX, centerY, Math.max(width, height) * 0.6);
+    ambientGrad.addColorStop(0, "rgba(20, 25, 45, 0.4)");
+    ambientGrad.addColorStop(1, "rgba(5, 5, 10, 0)");
+    ctx.fillStyle = ambientGrad;
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+    ctx.lineWidth = 1.2;
+
+    for (let i = 0; i < webSpokes.length; i++) {
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(webSpokes[i].endX, webSpokes[i].endY);
+        ctx.stroke();
+    }
+
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+    ctx.lineWidth = 1;
+
+    for (let r = 0; r < webRings.length; r++) {
+        let ring = webRings[r];
+        if (!ring || ring.length === 0) continue;
+
+        ctx.beginPath();
+        ctx.moveTo(ring[0].x, ring[0].y);
+        for (let i = 1; i < ring.length; i++) {
+            let prev = ring[i - 1];
+            let curr = ring[i];
+            let midX = (prev.x + curr.x) / 2;
+            let midY = (prev.y + curr.y) / 2 + 2;
+            ctx.quadraticCurveTo(midX, midY, curr.x, curr.y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+    }
+
+    dewDrops.forEach(drop => {
+        let shimmer = 0.4 + Math.sin(frame * 0.05 + drop.phase) * 0.4;
+        ctx.fillStyle = `rgba(220, 240, 255, ${shimmer})`;
+        ctx.beginPath();
+        ctx.arc(drop.x, drop.y, drop.size, 0, Math.PI * 2);
+        ctx.fill();
+    });
+
+    ctx.restore();
+}
+
+class PhotorealisticSpider {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.absAngle = 0;
+        this.speed = 0;
+        this.maxSpeed = 6.5;
+
+        this.carapaceLength = 17;
+        this.carapaceWidth = 14;
+        this.abdomenLength = 26;
+        this.abdomenWidth = 19;
+
+        this.coxaLength = 11;
+        this.femurLength = 32;
+        this.tibiaLength = 40;
+
+        this.gaitGroupA = [0, 2, 5, 7];
+        this.gaitGroupB = [1, 3, 4, 6];
+        this.activeGroup = 0;
+
+        const relAngles = [
+            -Math.PI * 0.42,
+            -Math.PI * 0.68,
+            -Math.PI * 1.06,
+            -Math.PI * 1.34,
+            Math.PI * 0.42,
+            Math.PI * 0.68,
+            Math.PI * 1.06,
+            Math.PI * 1.34
+        ];
+
+        const reachScales = [1.6, 1.4, 1.4, 1.6, 1.6, 1.4, 1.4, 1.6];
+
+        this.legs = [];
+        for (let i = 0; i < 8; i++) {
+            let isLeft = i < 4;
+            let ang = relAngles[i];
+            let totalReach = (this.coxaLength + this.femurLength + this.tibiaLength) * 0.74 * reachScales[i];
+
+            let fx = this.x + Math.cos(ang) * totalReach;
+            let fy = this.y + Math.sin(ang) * totalReach;
+
+            this.legs.push({
+                index: i,
+                isLeft: isLeft,
+                relAngle: ang,
+                reach: totalReach,
+                fx: fx,
+                fy: fy,
+                plantX: fx,
+                plantY: fy,
+                targetX: fx,
+                targetY: fy,
+                isStepping: false,
+                stepProgress: 1.0,
+                stepDuration: 5
+            });
+        }
+    }
+
+    update(targetX, targetY) {
+        let d = dist(this.x, this.y, targetX, targetY);
+        let targetAngle = angleBetween(this.x, this.y, targetX, targetY);
+
+        if (d > 16) {
+            let diff = targetAngle - this.absAngle;
+            diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+            this.absAngle += diff * 0.17;
+
+            this.speed = Math.min(this.maxSpeed, d * 0.085);
+            this.x += Math.cos(this.absAngle) * this.speed;
+            this.y += Math.sin(this.absAngle) * this.speed;
+        } else {
+            this.speed *= 0.8;
+        }
+
+        let isMoving = this.speed > 0.2;
+
+        let activeLegIndices = this.activeGroup === 0 ? this.gaitGroupA : this.gaitGroupB;
+        let anySteppingInActive = activeLegIndices.some(idx => this.legs[idx].isStepping);
+
+        if (!anySteppingInActive && isMoving) {
+            this.activeGroup = 1 - this.activeGroup;
+            activeLegIndices = this.activeGroup === 0 ? this.gaitGroupA : this.gaitGroupB;
+        }
+
+        this.legs.forEach(leg => {
+            let baseAngle = this.absAngle + leg.relAngle;
+            let lead = isMoving ? this.speed * 3.6 : 0;
+            let idealX = this.x + Math.cos(baseAngle) * leg.reach + Math.cos(this.absAngle) * lead;
+            let idealY = this.y + Math.sin(baseAngle) * leg.reach + Math.sin(this.absAngle) * lead;
+
+            leg.targetX = idealX;
+            leg.targetY = idealY;
+
+            let distToIdeal = dist(leg.fx, leg.fy, leg.targetX, leg.targetY);
+            let canStep = activeLegIndices.includes(leg.index);
+
+            if (canStep && !leg.isStepping && (distToIdeal > 22 || (!isMoving && distToIdeal > 34))) {
+                leg.isStepping = true;
+                leg.stepProgress = 0;
+                leg.plantX = leg.fx;
+                leg.plantY = leg.fy;
+            }
+
+            if (leg.isStepping) {
+                leg.stepProgress += 1.0 / leg.stepDuration;
+                if (leg.stepProgress >= 1.0) {
+                    leg.fx = leg.targetX;
+                    leg.fy = leg.targetY;
+                    leg.isStepping = false;
+                } else {
+                    let t = leg.stepProgress;
+                    let lx = leg.plantX + (leg.targetX - leg.plantX) * t;
+                    let ly = leg.plantY + (leg.targetY - leg.plantY) * t;
+                    let lift = -20 * Math.sin(t * Math.PI);
+
+                    leg.fx = lx;
+                    leg.fy = ly + lift;
+                }
+            }
+        });
+    }
+
+    draw() {
+        ctx.save();
+        ctx.shadowOffsetX = 12;
+        ctx.shadowOffsetY = 15;
+        ctx.shadowBlur = 18;
+        ctx.shadowColor = "rgba(0, 0, 0, 0.85)";
+
+        ctx.fillStyle = "rgba(0,0,0,0.9)";
+        ctx.strokeStyle = "rgba(0,0,0,0.9)";
+        ctx.lineWidth = 5;
+
+        this.legs.forEach(leg => {
+            let baseAngle = this.absAngle + leg.relAngle;
+            let hx = this.x + Math.cos(baseAngle) * 10;
+            let hy = this.y + Math.sin(baseAngle) * 10;
+            let cx = hx + Math.cos(baseAngle) * this.coxaLength;
+            let cy = hy + Math.sin(baseAngle) * this.coxaLength;
+            let fx = leg.fx;
+            let fy = leg.fy;
+
+            ctx.beginPath();
+            ctx.moveTo(hx, hy);
+            ctx.lineTo(cx, cy);
+            ctx.lineTo(fx, fy);
+            ctx.stroke();
+        });
+
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 14, 0, Math.PI * 2);
+        ctx.fill();
+
+        let abdoAngleShadow = this.absAngle + Math.PI;
+        let axShadow = this.x + Math.cos(abdoAngleShadow) * 22;
+        let ayShadow = this.y + Math.sin(abdoAngleShadow) * 22;
+        ctx.beginPath();
+        ctx.arc(axShadow, ayShadow, 18, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+
+        ctx.save();
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        this.legs.forEach(leg => {
+            let baseAngle = this.absAngle + leg.relAngle;
+
+            let hx = this.x + Math.cos(baseAngle) * 10;
+            let hy = this.y + Math.sin(baseAngle) * 10;
+
+            let cx = hx + Math.cos(baseAngle) * this.coxaLength;
+            let cy = hy + Math.sin(baseAngle) * this.coxaLength;
+
+            let fx = leg.fx;
+            let fy = leg.fy;
+
+            let L2 = this.femurLength;
+            let L3 = this.tibiaLength;
+            let d = dist(cx, cy, fx, fy);
+
+            let kx, ky;
+            if (d >= L2 + L3) {
+                let a = angleBetween(cx, cy, fx, fy);
+                kx = cx + Math.cos(a) * L2;
+                ky = cy + Math.sin(a) * L2;
+            } else {
+                let angBase = angleBetween(cx, cy, fx, fy);
+                let cosAlpha = (L2 * L2 + d * d - L3 * L3) / (2 * L2 * d);
+                cosAlpha = Math.max(-1, Math.min(1, cosAlpha));
+                let alpha = Math.acos(cosAlpha);
+
+                let sign = leg.isLeft ? -1 : 1;
+                let kneeAngle = angBase + alpha * sign;
+
+                kx = cx + Math.cos(kneeAngle) * L2;
+                ky = cy + Math.sin(kneeAngle) * L2;
+            }
+
+            ctx.strokeStyle = "#12121c";
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(hx, hy);
+            ctx.lineTo(cx, cy);
+            ctx.stroke();
+
+            ctx.strokeStyle = "#4a4a62";
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(hx, hy);
+            ctx.lineTo(cx, cy);
+            ctx.stroke();
+
+            let femurGrad = ctx.createLinearGradient(cx, cy, kx, ky);
+            femurGrad.addColorStop(0, "#252538");
+            femurGrad.addColorStop(0.5, "#12121c");
+            femurGrad.addColorStop(1, "#35354a");
+
+            ctx.strokeStyle = femurGrad;
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(kx, ky);
+            ctx.stroke();
+
+            ctx.strokeStyle = "#8a8aa8";
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(kx, ky);
+            ctx.stroke();
+
+            let spineAngle = angleBetween(cx, cy, kx, ky) + (leg.isLeft ? 0.8 : -0.8);
+            let midFemurX = (cx + kx) / 2;
+            let midFemurY = (cy + ky) / 2;
+
+            ctx.strokeStyle = "#aaaaaa";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(midFemurX, midFemurY);
+            ctx.lineTo(midFemurX + Math.cos(spineAngle) * 5, midFemurY + Math.sin(spineAngle) * 5);
+            ctx.stroke();
+
+            ctx.fillStyle = "#8a8aa8";
+            ctx.beginPath();
+            ctx.arc(kx, ky, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            let midX = (kx + fx) / 2 + (leg.isLeft ? -7 : 7);
+            let midY = (ky + fy) / 2;
+
+            ctx.strokeStyle = "#10101a";
+            ctx.lineWidth = 3.8;
+            ctx.beginPath();
+            ctx.moveTo(kx, ky);
+            ctx.quadraticCurveTo(midX, midY, fx, fy);
+            ctx.stroke();
+
+            ctx.strokeStyle = "#777799";
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.moveTo(kx, ky);
+            ctx.quadraticCurveTo(midX, midY, fx, fy);
+            ctx.stroke();
+        });
+
+        let abdoAngle = this.absAngle + Math.PI;
+        let ax = this.x + Math.cos(abdoAngle) * 24;
+        let ay = this.y + Math.sin(abdoAngle) * 24;
+
+        ctx.save();
+        ctx.translate(ax, ay);
+        ctx.rotate(abdoAngle);
+
+        ctx.fillStyle = "#0c0c14";
+        ctx.beginPath();
+        ctx.arc(-14, 0, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.scale(1.4, 1.0);
+
+        let abdoGrad = ctx.createRadialGradient(-4, -4, 2, 0, 0, 18);
+        abdoGrad.addColorStop(0, "#555577");
+        abdoGrad.addColorStop(0.3, "#252538");
+        abdoGrad.addColorStop(0.85, "#0b0b14");
+        abdoGrad.addColorStop(1, "#020205");
+
+        ctx.fillStyle = abdoGrad;
+        ctx.strokeStyle = "#777799";
+        ctx.lineWidth = 1.2;
+
+        ctx.beginPath();
+        ctx.arc(0, 0, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#ff1a40";
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = "#ff1a40";
+
+        ctx.beginPath();
+        ctx.moveTo(-6, 0);
+        ctx.lineTo(2, -4.5);
+        ctx.lineTo(7, 0);
+        ctx.lineTo(2, 4.5);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.restore();
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.absAngle);
+
+        let headGrad = ctx.createRadialGradient(-3, -3, 2, 0, 0, this.carapaceLength);
+        headGrad.addColorStop(0, "#6a6a8e");
+        headGrad.addColorStop(0.4, "#2a2a3e");
+        headGrad.addColorStop(0.85, "#10101c");
+        headGrad.addColorStop(1, "#040408");
+
+        ctx.fillStyle = headGrad;
+        ctx.strokeStyle = "#8888aa";
+        ctx.lineWidth = 1.4;
+
+        ctx.beginPath();
+        ctx.arc(0, 0, this.carapaceLength, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.strokeStyle = "rgba(0,0,0,0.6)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-4, 0);
+        ctx.lineTo(2, 0);
+        ctx.stroke();
+
+        ctx.fillStyle = "#0c0c14";
+        ctx.strokeStyle = "#555577";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(13, -3.5, 3.5, 0, Math.PI * 2);
+        ctx.arc(13, 3.5, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.strokeStyle = "#ff3355";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(14, -4);
+        ctx.quadraticCurveTo(19, -4, 18, -1);
+        ctx.moveTo(14, 4);
+        ctx.quadraticCurveTo(19, 4, 18, 1);
+        ctx.stroke();
+
+        let palpTap = Math.sin(frame * 0.12) * 2;
+        ctx.strokeStyle = "#9999bb";
+        ctx.lineWidth = 2.2;
+        ctx.lineCap = "round";
+
+        ctx.beginPath();
+        ctx.moveTo(11, -5);
+        ctx.lineTo(18, -8 + palpTap);
+        ctx.lineTo(23, -5 + palpTap);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(11, 5);
+        ctx.lineTo(18, 8 - palpTap);
+        ctx.lineTo(23, 5 - palpTap);
+        ctx.stroke();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(23, -5 + palpTap, 1.2, 0, Math.PI * 2);
+        ctx.arc(23, 5 - palpTap, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = "#88ccff";
+        ctx.fillStyle = "#ffffff";
+
+        ctx.beginPath();
+        ctx.arc(12, -2.5, 2.0, 0, Math.PI * 2);
+        ctx.arc(12, 2.5, 2.0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#000000";
+        ctx.beginPath();
+        ctx.arc(12.5, -2.2, 0.8, 0, Math.PI * 2);
+        ctx.arc(12.5, 2.2, 0.8, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.shadowBlur = 3;
+        ctx.shadowColor = "#ffffff";
+        ctx.fillStyle = "#ddddee";
+
+        ctx.beginPath();
+        ctx.arc(10, -5.5, 1.3, 0, Math.PI * 2);
+        ctx.arc(10, 5.5, 1.3, 0, Math.PI * 2);
+        ctx.arc(7, -3.5, 1.2, 0, Math.PI * 2);
+        ctx.arc(7, 3.5, 1.2, 0, Math.PI * 2);
+        ctx.arc(5, -6.0, 1.1, 0, Math.PI * 2);
+        ctx.arc(5, 6.0, 1.1, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+
+        ctx.restore();
+    }
+}
+
+const spider = new PhotorealisticSpider(width / 2, height / 2);
+
+function loop() {
+    frame++;
+    ctx.clearRect(0, 0, width, height);
+
+    drawWeb();
+    spider.update(mouse.x, mouse.y);
+    spider.draw();
+
+    requestAnimationFrame(loop);
+}
+
+loop();
+</script>
 </html>
