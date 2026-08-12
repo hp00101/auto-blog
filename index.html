@@ -2,68 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tech & AI Insights Hub</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Spider Procedural Cursor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000000;
+            user-select: none;
+            touch-action: none;
+        }
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <span class="badge">Est. 2026</span>
-            <h1>Tech & AI Insights Hub</h1>
-            <p>Your ultimate source for modern software, cloud hosting, and automation tools.</p>
-        </div>
-    </header>
-
-    <main class="container">
-        <section class="posts-feed" aria-labelledby="latest-heading">
-            <h2 id="latest-heading">Latest Articles</h2>
-            
-            <article class="post-card featured">
-                <div class="post-meta">
-                    <span class="tag tag--featured">Featured</span>
-                    <time datetime="2026-08-05">August 5, 2026</time>
-                </div>
-                <h3>
-                    <a href="posts/top-ai-tools-2026.html">
-                        Top 5 AI and Automation Tools to Scale Your Workflow in 2026
-                    </a>
-                </h3>
-                <p>Discover the leading tools revolutionizing business productivity and digital workflows this year. From autonomous agents to context-aware orchestration.</p>
-                <a href="posts/top-ai-tools-2026.html" class="read-more">
-                    Read Article
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </a>
-            </article>
-
-            <article class="post-card">
-                <div class="post-meta">
-                    <span class="tag tag--automated">AI Feed</span>
-                    <time datetime="2026-08-05">Live Updates</time>
-                </div>
-                <h3>
-                    <a href="posts/">View All AI-Generated Insights & Updates</a>
-                </h3>
-                <p>Explore all freshly generated articles created autonomously by our AI workflow engine. Updated in real-time as new trends emerge.</p>
-                <a href="posts/" class="read-more">
-                    Browse Posts
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </a>
-            </article>
-        </section>
-    </main>
-
-    <footer>
-        <div class="container">
-            <p>&copy; 2026 Tech & AI Insights Hub. All rights reserved.</p>
-        </div>
-    </footer>
+    <canvas id="canvas"></canvas>
+    <script src="script.js"></script>
 </body>
 </html>
