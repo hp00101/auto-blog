@@ -24,6 +24,8 @@
     
     --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 }
 
 * {
@@ -296,6 +298,178 @@ footer p {
     
     .post-meta {
         flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+/* ========================================
+   Status Line (hero)
+   ======================================== */
+.status-line {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: #7dd3fc;
+    background: rgba(14, 165, 233, 0.08);
+    border: 1px solid rgba(14, 165, 233, 0.2);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    letter-spacing: 0.01em;
+    margin-top: 4px;
+}
+
+.status-line .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #34d399;
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.2);
+    flex-shrink: 0;
+}
+
+/* ========================================
+   Wide container (multi-column contexts)
+   ======================================== */
+.container--wide {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* ========================================
+   Category Filters
+   ======================================== */
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 40px 0 8px;
+}
+
+.filter-pill {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    padding: 8px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.filter-pill:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.filter-pill.active {
+    background: var(--color-text);
+    border-color: var(--color-text);
+    color: #fff;
+}
+
+.filter-pill:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* ========================================
+   Posts Grid (homepage)
+   ======================================== */
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    padding: 24px 0 80px;
+    align-items: stretch;
+}
+
+.posts-grid .post-card {
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.posts-grid .post-card > p {
+    flex-grow: 1;
+}
+
+.post-meta time {
+    font-family: var(--font-mono);
+}
+
+/* Category tag colors */
+.tag--ai-news { color: #1d4ed8; background: #dbeafe; }
+.tag--ai-update { color: #0369a1; background: #e0f2fe; }
+.tag--top-5 { color: #b45309; background: #fef3c7; }
+.tag--automation { color: #059669; background: #d1fae5; }
+
+/* ========================================
+   Empty / Loading States
+   ======================================== */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 64px 24px;
+    color: var(--color-text-muted);
+}
+
+.empty-state h3 {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    font-size: 0.9375rem;
+}
+
+.skeleton-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.1), transparent);
+    animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .skeleton-card::after { animation: none; }
+    .post-card, .filter-pill, .read-more, .read-more svg { transition: none; }
+}
+
+@media (max-width: 640px) {
+    .container--wide {
+        padding: 0 20px;
+    }
+
+    .posts-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 16px 0 56px;
+    }
+
+    .filters {
+        padding: 28px 0 4px;
         gap: 8px;
     }
 }
