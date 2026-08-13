@@ -22,107 +22,149 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Run AI Generator Script and Update Indexes
+      - name: Run AI Generator Script and Update Posts Manifest
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           python -c '
-          import os, requests, json, base64
+          import os, requests, json, base64, re
           from datetime import datetime
-
+          
           api_key = os.environ["GEMINI_API_KEY"]
           gh_token = os.environ["GH_TOKEN"]
           repo = "hp00101/auto-blog"
-          headers = {"Authorization": f"Bearer {gh_token}", "Accept": "vnd.github+json"}
-
-          # 1. Generate Content from Gemini API
-          url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-          prompt = "Write an SEO-optimized HTML article about a trending tech or cloud hosting tool in 2026. Include a catchy h2 title at the very beginning, followed by headings (<h2>, <h3>), paragraphs (<p>), and a link mentioning Hostinger or Make.com. Return ONLY the HTML body content inside standard HTML article tags, without markdown code blocks."
+          headers = {"Authorization": f"Bearer {gh_token}", "Accept": "application/vnd.github+json"}
           
+          CATEGORIES = ["AI News", "AI Update", "Top 5 AI", "Automation Workflow"]
+          CATEGORY_CLASS = {
+              "AI News": "tag--ai-news",
+              "AI Update": "tag--ai-update",
+              "Top 5 AI": "tag--top-5",
+              "Automation Workflow": "tag--automation",
+          }
+          
+          # 1. Generate content from Gemini as structured JSON
+          url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+          prompt = (
+              "Write an SEO-optimized article about a trending AI, automation, or cloud "
+              "hosting tool in 2026. Respond with ONLY a raw JSON object, no markdown "
+              "fences and no commentary, with exactly these keys: "
+              "title (a catchy headline under 70 characters), "
+              "category (exactly one of AI News, AI Update, Top 5 AI, Automation Workflow), "
+              "excerpt (a one-sentence summary under 160 characters), "
+              "html (the article body as HTML using h3 for subheadings and p for "
+              "paragraphs, including one link mentioning Hostinger or Make.com)."
+          )
           payload = {"contents": [{"parts": [{"text": prompt}]}]}
           response = requests.post(url, headers={"Content-Type": "application/json"}, data=json.dumps(payload))
           
           if response.status_code == 200:
               res_json = response.json()
-              article_html = res_json["candidates"][0]["content"]["parts"][0]["text"]
-              
-              date_str = datetime.now().strftime("%Y-%m-%d-%H%M%S")
-              file_slug = f"ai-article-{date_str}"
-              filename = f"posts/{file_slug}.html"
-              
-              # Extract title or use a generic one
-              title = f"AI Tech Insight - {datetime.now().strftime(\"%b %d, %Y\")}"
-              
-              # 2. Create Full Article HTML Page
+              raw_text = res_json["candidates"][0]["content"]["parts"][0]["text"]
+              cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw_text.strip())
+          
+              fallback_title = "AI Tech Insight - " + datetime.now().strftime("%b %d, %Y")
+              fallback_excerpt = "Explore the latest automated insights on AI and automation tools."
+              try:
+                  article = json.loads(cleaned)
+                  title = article.get("title") or fallback_title
+                  category = article.get("category") if article.get("category") in CATEGORIES else "AI News"
+                  excerpt = article.get("excerpt") or fallback_excerpt
+                  article_html = article.get("html") or "<p>Content unavailable.</p>"
+              except Exception:
+                  title = fallback_title
+                  category = "AI News"
+                  excerpt = fallback_excerpt
+                  article_html = "<p>" + raw_text + "</p>"
+          
+              now = datetime.now()
+              file_slug = "ai-article-" + now.strftime("%Y-%m-%d-%H%M%S")
+              filename = "posts/" + file_slug + ".html"
+              iso_date = now.strftime("%Y-%m-%d")
+              display_date = now.strftime("%b %d, %Y")
+              tag_class = CATEGORY_CLASS.get(category, "tag--ai-news")
+          
+              # 2. Build the full article page
               full_page = f"""<!DOCTYPE html>
-              <html lang=\"en\">
-              <head>
-                  <meta charset=\"UTF-8\">
-                  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-                  <title>{title}</title>
-                  <link rel=\"stylesheet\" href=\"../styles.css\">
-              </head>
-              <body>
-                  <header>
-                      <div class=\"container\">
-                          <h1>Tech & AI Insights Hub</h1>
-                          <p><a href=\"../index.html\" style=\"color: #bdc3c7; text-decoration: none;\">&larr; Back to Home</a></p>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>{title}</title>
+              <link rel="preconnect" href="https://fonts.googleapis.com">
+              <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+              <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+              <link rel="stylesheet" href="../styles.css">
+          </head>
+          <body>
+              <header>
+                  <div class="container">
+                      <h1>Tech &amp; AI Insights Hub</h1>
+                      <p><a href="../index.html" style="color: #bdc3c7; text-decoration: none;">&larr; Back to Home</a></p>
+                  </div>
+              </header>
+              <main class="container">
+                  <article class="post-card">
+                      <div class="post-meta">
+                          <span class="tag {tag_class}">{category}</span>
+                          <time class="date" datetime="{iso_date}">{display_date}</time>
                       </div>
-                  </header>
-                  <main class=\"container\">
-                      <article class=\"post-card\">
-                          {article_html}
-                      </article>
-                  </main>
-                  <footer>
-                      <p>&copy; 2026 Tech & AI Insights Hub. All rights reserved.</p>
-                  </footer>
-              </body>
-              </html>"""
-
-              # 3. Push New Article File to GitHub
+                      <h2>{title}</h2>
+                      {article_html}
+                  </article>
+              </main>
+              <footer>
+                  <p>&copy; 2026 Tech &amp; AI Insights Hub. All rights reserved.</p>
+              </footer>
+          </body>
+          </html>"""
+          
+              # 3. Push the new article file
               gh_url = f"https://api.github.com/repos/{repo}/contents/{filename}"
               encoded_content = base64.b64encode(full_page.encode("utf-8")).decode("utf-8")
               data = {
                   "message": f"Auto-generated article: {filename}",
                   "content": encoded_content,
-                  "branch": "main"
+                  "branch": "main",
               }
               put_res = requests.put(gh_url, headers=headers, data=json.dumps(data))
               print("Article publish status:", put_res.status_code)
-
-              # 4. Update posts/index.html to automatically include the new post
-              posts_index_url = f"https://api.github.com/repos/{repo}/contents/posts/index.html"
-              get_pi = requests.get(posts_index_url, headers=headers)
-              if get_pi.status_code == 200:
-                  pi_data = get_pi.json()
-                  pi_sha = pi_data["sha"]
-                  pi_content = base64.b64decode(pi_data["content"]).decode("utf-8")
-                  
-                  # Insert new post card right above the first existing article
-                  new_card = f"""
-                  <article class="post-card">
-                      <h3><a href="{file_slug}.html">{title}</a></h3>
-                      <p class="date">Automated Post</p>
-                      <p>Explore the latest automated insights on software and cloud tools.</p>
-                      <a href="{file_slug}.html" class="read-more">Read Article &rarr;</a>
-                  </article>
-                  """
-                  
-                  if "<h2>All Published Articles</h2>" in pi_content:
-                      updated_pi = pi_content.replace("<h2>All Published Articles</h2>", f"<h2>All Published Articles</h2>\n{new_card}")
-                  else:
-                      updated_pi = pi_content + new_card
-                      
-                  encoded_pi = base64.b64encode(updated_pi.encode("utf-8")).decode("utf-8")
-                  pi_put_data = {
-                      "message": f"Update posts/index.html with {file_slug}",
-                      "content": encoded_pi,
-                      "sha": pi_sha,
-                      "branch": "main"
-                  }
-                  requests.put(posts_index_url, headers=headers, data=json.dumps(pi_put_data))
+          
+              # 4. Append this post to posts/posts.json so the homepage picks it up
+              manifest_path = "posts/posts.json"
+              manifest_url = f"https://api.github.com/repos/{repo}/contents/{manifest_path}"
+              get_m = requests.get(manifest_url, headers=headers)
+              if get_m.status_code == 200:
+                  m_data = get_m.json()
+                  m_sha = m_data["sha"]
+                  try:
+                      posts = json.loads(base64.b64decode(m_data["content"]).decode("utf-8"))
+                  except Exception:
+                      posts = []
+              else:
+                  m_sha = None
+                  posts = []
+          
+              posts.insert(0, {
+                  "slug": file_slug,
+                  "title": title,
+                  "excerpt": excerpt,
+                  "date": iso_date,
+                  "category": category,
+                  "url": filename,
+              })
+          
+              encoded_m = base64.b64encode(json.dumps(posts, indent=2).encode("utf-8")).decode("utf-8")
+              m_put_data = {
+                  "message": f"Add {file_slug} to posts manifest",
+                  "content": encoded_m,
+                  "branch": "main",
+              }
+              if m_sha:
+                  m_put_data["sha"] = m_sha
+              manifest_res = requests.put(manifest_url, headers=headers, data=json.dumps(m_put_data))
+              print("Manifest update status:", manifest_res.status_code)
           else:
               print("Gemini API Error:", response.text)
           '
